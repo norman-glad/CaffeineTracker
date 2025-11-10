@@ -5,7 +5,7 @@
 [![Jetpack Compose](https://img.shields.io/badge/Compose-2024.10.00-purple)](https://developer.android.com/compose)
 [![Room](https://img.shields.io/badge/Room-2.6.1-orange)](https://developer.android.com/training/data-storage/room)
 
-**A clean, modern Android app to track my caffeine intake with a real-time decay graph.**  
+**A clean minimalistic app to track my caffeine intake with a real-time decay graph.**  
 No more guessing how much coffee is still in my system at 3 AM.
 
 ## Why I made this
