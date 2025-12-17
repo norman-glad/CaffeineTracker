@@ -24,7 +24,6 @@ So I built this: log your caffeine, watch it decay over time (5-hour half-life),
 ## Screenshots
 <img src="screenshots/img2.png" width="300"/> <img src="screenshots/img3.png" width="300"/> <img src="screenshots/img1.png" width="300"/> 
 
-*(I'll add real screenshots later – just run the app, it's gorgeous)*
 
 ## Tech Stack
 - **Language**: Kotlin 2.0.21
