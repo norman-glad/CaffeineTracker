@@ -1,15 +1,21 @@
 package com.example.caffeinetracker.presentation.ui
 
-import android.graphics.Color.parseColor
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.caffeinetracker.data.model.CaffeineLog
+import com.example.caffeinetracker.ui.theme.GraphAxisDark
+import com.example.caffeinetracker.ui.theme.GraphAxisLight
+import com.example.caffeinetracker.ui.theme.GraphBackgroundDark
+import com.example.caffeinetracker.ui.theme.GraphBackground
+import com.example.caffeinetracker.ui.theme.GraphLineColor
+import com.example.caffeinetracker.ui.theme.LocalDarkMode
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
@@ -21,36 +27,45 @@ import kotlin.math.pow
 @Composable
 fun CaffeineGraph(logs: List<CaffeineLog>) {
     val isEmpty = logs.isEmpty()
+    val isDark = LocalDarkMode.current
+    
+    // Pre-compute colors based on theme
+    val backgroundColor = if (isDark) MaterialTheme.colorScheme.background else androidx.compose.ui.graphics.Color.White
+    val gridColor = if (isDark) GraphBackgroundDark else GraphBackground
+    val axisColor = if (isDark) GraphAxisDark else GraphAxisLight
+    val emptyLineColor = if (isDark) 0xFF555555.toInt() else 0xFFDDDDDD.toInt()
+    val emptyTextColor = if (isDark) 0xFFAAAAAA.toInt() else 0xFF666666.toInt()
 
     AndroidView(
         factory = { context ->
             LineChart(context).apply {
-                // Base styling
                 xAxis.position = XAxis.XAxisPosition.BOTTOM
                 xAxis.setLabelCount(9, true)
                 xAxis.valueFormatter = object : ValueFormatter() {
                     override fun getFormattedValue(value: Float): String = "${value.toInt()}h"
                 }
                 axisRight.isEnabled = false
-                axisLeft.textColor = parseColor("#000000")
-                xAxis.textColor = parseColor("#000000")
                 description.isEnabled = false
                 legend.isEnabled = false
-                setBackgroundColor(parseColor("#FFFFFF"))
                 setDrawGridBackground(true)
-                setGridBackgroundColor(parseColor("#F0F0F0"))
             }
         },
-        update = { chart ->  // ← THIS IS THE MAGIC LINE THAT WAS MISSING
+        update = { chart ->
+            // Update colors when theme changes
+            chart.setBackgroundColor(backgroundColor.toArgb())
+            chart.setGridBackgroundColor(gridColor.toArgb())
+            chart.axisLeft.textColor = axisColor.toArgb()
+            chart.xAxis.textColor = axisColor.toArgb()
+
             if (isEmpty) {
                 chart.description.isEnabled = true
                 chart.description.text = "Log caffeine to see the graph"
                 chart.description.textSize = 16f
-                chart.description.textColor = parseColor("#666666")
+                chart.description.textColor = emptyTextColor
 
                 val emptyEntries = listOf(Entry(-12f, 0f), Entry(12f, 0f))
                 val emptySet = LineDataSet(emptyEntries, "").apply {
-                    color = parseColor("#DDDDDD")
+                    color = emptyLineColor
                     setDrawValues(false)
                     setDrawCircles(false)
                     setDrawFilled(false)
@@ -81,21 +96,22 @@ fun CaffeineGraph(logs: List<CaffeineLog>) {
                 }
 
                 val dataSet = LineDataSet(entries, "Caffeine Level").apply {
-                    color = androidx.compose.ui.graphics.Color(0xFF6750A4).toArgb()
+                    color = GraphLineColor.toArgb()
                     lineWidth = 2.5f
                     setDrawCircles(false)
                     setDrawValues(false)
                     setDrawFilled(true)
-                    fillColor = androidx.compose.ui.graphics.Color(0xFF6750A4).copy(alpha = 0.3f).toArgb()
+                    fillColor = GraphLineColor.copy(alpha = 0.3f).toArgb()
                     mode = LineDataSet.Mode.CUBIC_BEZIER
                 }
                 chart.data = LineData(dataSet)
             }
-            chart.invalidate()  // ← Force redraw
+            chart.animateX(300)
+            chart.invalidate()
         },
         modifier = Modifier
             .height(400.dp)
             .fillMaxSize()
-            .background(androidx.compose.ui.graphics.Color.White)
+            .background(backgroundColor)
     )
 }
